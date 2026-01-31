@@ -6,6 +6,7 @@
     "packages/*"
   ],
   "scripts": {
+    "start": "pnpm --filter api start",
     "build": "turbo run build",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
@@ -28,7 +29,7 @@
   },
   "packageManager": "pnpm@8.15.6",
   "engines": {
-    "node": ">=18"
+    "node": "20.x"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

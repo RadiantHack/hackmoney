@@ -1,0 +1,38 @@
+# Dependencies and build artifacts
+node_modules
+.pnpm-store
+.turbo
+.next
+dist
+dist-ssr
+*.log
+.cache
+
+# Git and IDE
+.git
+.gitignore
+.editorconfig
+.vscode
+*.md
+!README.md
+
+# Env and local
+.env
+.env.*
+!.env.example
+*.local
+
+# Tests and dev
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+coverage
+.jest
+
+# Misc
+.DS_Store
+*.local
+server/dist
+public/dist

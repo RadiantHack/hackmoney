@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { log } from "@openpay/logger";
+import { API_BASE } from "../lib/api";
 import "./auth.css";
 
 export default function HomePage() {
@@ -106,7 +107,7 @@ export default function HomePage() {
     try {
       const endpoint =
         mode === "signup" ? "/api/auth/signup" : "/api/auth/signin";
-      const response = await fetch(`http://localhost:5001${endpoint}`, {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

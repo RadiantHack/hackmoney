@@ -1,0 +1,7 @@
+# Force Node.js runtime (avoid typescript:default detection)
+# https://nixpacks.com/docs/providers/node
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[variables]
+NIXPACKS_NODE_VERSION = "20"

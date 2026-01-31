@@ -1,0 +1,32 @@
+# DigitalOcean App Platform – deploy ONLY api + webapp from this repo.
+# Do NOT use "Functions" or "detect all packages" – that creates one action per
+# folder (backend/, logger/, ui/, etc.) with typescript:default and fails.
+# Use this spec: 2 services, both Node.js, source at repo root.
+
+name: hackmoney
+region: nyc
+
+services:
+  - name: api
+    github:
+      repo: RadiantHack/hackmoney
+      branch: main
+      deploy_on_push: true
+    build_command: pnpm install && pnpm db:generate && pnpm --filter api build
+    run_command: pnpm db:generate && pnpm --filter api start
+    environment_slug: node-js
+    http_port: 3000
+    instance_size_slug: basic-xxs
+    instance_count: 1
+
+  - name: webapp
+    github:
+      repo: RadiantHack/hackmoney
+      branch: main
+      deploy_on_push: true
+    build_command: pnpm install && pnpm --filter webapp build
+    run_command: pnpm --filter webapp start
+    environment_slug: node-js
+    http_port: 3000
+    instance_size_slug: basic-xxs
+    instance_count: 1

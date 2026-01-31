@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_BASE } from "../../lib/api";
 import "./styles.css";
 import {
   BsEyeFill,
@@ -98,7 +99,7 @@ export default function CustomerPage() {
 
         // Fetch user profile and card details
         const profileResponse = await fetch(
-          "http://localhost:5001/api/customer/profile",
+          `${API_BASE}/api/customer/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -115,7 +116,7 @@ export default function CustomerPage() {
 
         // Fetch card details
         const cardResponse = await fetch(
-          "http://localhost:5001/api/customer/card",
+          `${API_BASE}/api/customer/card`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

@@ -1,0 +1,11 @@
+# DigitalOcean Functions: minimal stub only.
+# This repo is for App Platform (API + webapp). Use .do/app.yaml or docs/DEPLOY_DIGITALOCEAN.md.
+# Do NOT deploy as Functions; create an App Platform app and add two Services (api, webapp).
+
+packages:
+  - name: do-stub
+    functions:
+      - name: redirect
+        runtime: nodejs:18
+        main: index.js
+        web: true
