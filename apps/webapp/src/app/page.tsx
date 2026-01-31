@@ -22,7 +22,7 @@ export default function HomePage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  log("OpenPay Portal");
+  log("LiquidCard Portal");
 
   useEffect(() => {
     setError("");
@@ -152,11 +152,11 @@ export default function HomePage() {
     <div className="container">
       <div className="hero-section">
         <h1 className="title">
-          OpenPay
+          LiquidCard
           <span className="title-accent"> Payment Platform</span>
         </h1>
         <p className="description">
-          Welcome to OpenPay. Make secure payments as a customer or manage your
+          Welcome to LiquidCard. Make secure payments as a customer or manage your
           business as a merchant.
         </p>
       </div>

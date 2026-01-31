@@ -1,4 +1,4 @@
-# OpenPay
+# LiquidCard
 
 API + Next.js webapp monorepo. Auth, customer, and payments via Express API; web UI in Next.js.
 

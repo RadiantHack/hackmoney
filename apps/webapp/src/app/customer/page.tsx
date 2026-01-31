@@ -233,7 +233,7 @@ export default function CustomerPage() {
             <div className="logo-icon">
               <span>OP</span>
             </div>
-            <h1>OpenPay</h1>
+            <h1>LiquidCard</h1>
           </div>
         </div>
 
@@ -911,7 +911,7 @@ export default function CustomerPage() {
                 <h2>Receive Payment</h2>
                 <p>Share your payment link</p>
                 <div className="payment-link">
-                  <input type="text" value="openpay.me/johndoe" readOnly />
+                  <input type="text" value="liquidcard.me/johndoe" readOnly />
                   <button className="copy-btn">
                     <FaCopy />
                   </button>

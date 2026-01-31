@@ -20,7 +20,7 @@ export const createServer = (): Express => {
     })
     .use(cors())
     .get("/health", (_, res) => {
-      return res.json({ status: "ok", service: "openpay-api" });
+      return res.json({ status: "ok", service: "liquidcard-api" });
     })
     .use("/api/auth", authRoutes)
     .use("/api/customer", customerRoutes)
