@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  emailVerified     Boolean   @default(false)
+  verificationToken String?
+  name              String?
+  password          String
+  walletAddress     String?   @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  role              UserRole  @default(CUSTOMER)
+  merchant          Merchant?
+  customer          Customer?
+}
+
+model Merchant {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName String
+  stakedAmount Decimal   @default(0) @db.Decimal(18, 2)
+  ensName      String?   @unique
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  payments     Payment[]
+}
+
+model Customer {
+  id               String    @id @default(uuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  payments         Payment[]
+  cards            Card[]
+}
+
+model Card {
+  id           String     @id @default(uuid())
+  customerId   String
+  customer     Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  cardNumber   String     @unique
+  cardLast4    String
+  cardBrand    String     @default("Visa")
+  cardExpMonth Int
+  cardExpYear  Int
+  cardCvv      String
+  cardPin      String?
+  cardStatus   CardStatus @default(ACTIVE)
+  stripeCardId String?    @unique
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([customerId])
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  merchantId String
+  merchant   Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customerId String?
+  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  amount     Decimal       @db.Decimal(10, 2)
+  currency   String        @default("USD")
+  status     PaymentStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
+
+enum UserRole {
+  CUSTOMER
+  MERCHANT
+  ADMIN
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum CardStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}

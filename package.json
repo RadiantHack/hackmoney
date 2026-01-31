@@ -1,0 +1,37 @@
+{
+  "name": "openpay",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "turbo run clean",
+    "dev": "turbo run dev",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,scss,html}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,scss,html}\"",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "check-types": "turbo run check-types",
+    "services:up": "docker compose up -d",
+    "services:down": "docker compose down",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push",
+    "db:migrate": "turbo run db:migrate",
+    "db:deploy": "turbo run db:deploy",
+    "db:seed": "turbo run seed"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.0",
+    "turbo": "^2.7.6"
+  },
+  "packageManager": "pnpm@8.15.6",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "react-icons": "^5.5.0"
+  }
+}

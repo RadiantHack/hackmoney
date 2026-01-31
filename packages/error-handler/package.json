@@ -1,0 +1,27 @@
+{
+  "name": "@openpay/error-handler",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "require": "./dist/index.cjs",
+    "import": "./dist/index.js"
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "dev": "tsup --watch",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@openpay/eslint-config": "workspace:*",
+    "@openpay/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "tsup": "^8.5.0",
+    "typescript": "5.9.3"
+  }
+}

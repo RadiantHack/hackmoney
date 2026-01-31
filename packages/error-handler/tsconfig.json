@@ -1,0 +1,9 @@
+{
+  "extends": "@openpay/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "noEmit": false,
+    "allowImportingTsExtensions": false
+  },
+  "include": ["src"]
+}

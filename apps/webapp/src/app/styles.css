@@ -1,0 +1,251 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.5;
+  tab-size: 4;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  position: relative;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(120, 119, 198, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(255, 119, 198, 0.3) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 2rem 16px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.hero-section {
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  margin: 0;
+  color: white;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.title-accent {
+  display: block;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-top: 0.5rem;
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 400;
+  font-size: 1.125rem;
+  margin-top: 1rem;
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+.description a {
+  color: #fbbf24;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.description a:hover {
+  color: #f59e0b;
+  text-decoration: underline;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    transform: translateY(0);
+  }
+}
+
+/* Tablet and below */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem 1rem;
+    gap: 1.75rem;
+    justify-content: flex-start;
+    padding-top: 2rem;
+  }
+
+  .hero-section {
+    width: 100%;
+  }
+
+  .title {
+    font-size: clamp(2rem, 8vw, 3rem);
+    line-height: 1.1;
+  }
+
+  .title-accent {
+    margin-top: 0.25rem;
+  }
+
+  .description {
+    font-size: clamp(0.9375rem, 3vw, 1.0625rem);
+    margin-top: 0.75rem;
+    padding: 0 0.5rem;
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 640px) {
+  body {
+    background-attachment: fixed;
+  }
+
+  .container {
+    padding: 1rem 0.75rem;
+    gap: 1.25rem;
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  .hero-section {
+    width: 100%;
+    padding: 0 0.25rem;
+  }
+
+  .title {
+    font-size: clamp(1.75rem, 10vw, 2.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .title-accent {
+    margin-top: 0.25rem;
+    font-size: clamp(1.5rem, 8vw, 2rem);
+  }
+
+  .description {
+    font-size: clamp(0.875rem, 4vw, 1rem);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+    padding: 0;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 375px) {
+  .container {
+    padding: 0.75rem 0.5rem;
+    gap: 1rem;
+  }
+
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .title-accent {
+    font-size: 1.5rem;
+  }
+
+  .description {
+    font-size: 0.875rem;
+  }
+}
+
+/* Landscape mobile */
+@media (max-width: 896px) and (orientation: landscape) {
+  .container {
+    padding: 1rem;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .hero-section {
+    margin-bottom: 0;
+  }
+
+  .title {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  .description {
+    font-size: 0.9375rem;
+    margin-top: 0.5rem;
+  }
+}

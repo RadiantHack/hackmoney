@@ -1,0 +1,20 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "db:generate": {
+      "outputs": ["node_modules/prisma/**"]
+    },
+    "db:push": {
+      "dependsOn": ["db:generate"]
+    },
+    "db:migrate": {
+      "dependsOn": ["db:generate"]
+    },
+    "db:deploy": {
+      "dependsOn": ["db:generate"]
+    },
+    "seed": {
+      "dependsOn": ["db:generate"]
+    }
+  }
+}
