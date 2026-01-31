@@ -1,6 +1,6 @@
 # Deploy to DigitalOcean – Step by Step
 
-This guide covers deploying the **Onyx/hackmoney** monorepo (API + Next.js webapp) on **DigitalOcean App Platform**. You’ll get HTTPS, auto-deploys from GitHub, and managed PostgreSQL + Redis.
+This guide covers deploying the **LiquidCard** monorepo (API + Next.js webapp) on **DigitalOcean App Platform**. You’ll get HTTPS, auto-deploys from GitHub, and managed PostgreSQL + Redis.
 
 ---
 
@@ -64,7 +64,7 @@ See [Part 4: Environment variables](#part-4-environment-variables) for the full 
    - **Engine:** PostgreSQL 16  
    - **Plan:** Basic (1 node) or higher  
    - **Region:** Pick one (e.g. NYC / SFO)  
-   - **Name:** e.g. `hackmoney-db`  
+   - **Name:** e.g. `liquidcard-db`  
    - Click **Create Database Cluster**  
    - Wait until status is **Online**.
 
@@ -97,7 +97,7 @@ See [Part 4: Environment variables](#part-4-environment-variables) for the full 
    - **Engine:** Redis 7  
    - **Plan:** Basic (1 node)  
    - **Region:** Same as PostgreSQL  
-   - **Name:** e.g. `hackmoney-redis`  
+   - **Name:** e.g. `liquidcard-redis`  
    - Create and wait until **Online**  
    - **Trusted sources:** Same as PostgreSQL — add App Platform or `0.0.0.0/0` if you want to allow all.  
    - **Connection details** → note **Host**, **Port**, **Password** (no user).
@@ -121,7 +121,7 @@ See [Part 4: Environment variables](#part-4-environment-variables) for the full 
 
 3. **Use the app spec (recommended)**  
    - If DigitalOcean offers **Import app spec** or **Use existing app spec**, use it and point to **`.do/app.yaml`** so you get two services (api + webapp) with run commands. That avoids the error “no default process a command is required”.  
-   - Otherwise, **Configure resources** manually as in Part 3. If you end up with one component (e.g. “hackmoney”) with no Run Command, set it as in [Troubleshooting](#troubleshooting) or add two Services and set Build/Run commands for each.
+   - Otherwise, **Configure resources** manually as in Part 3. If you end up with one component (e.g. “liquidcard”) with no Run Command, set it as in [Troubleshooting](#troubleshooting) or add two Services and set Build/Run commands for each.
 
 ---
 
@@ -178,8 +178,9 @@ See [Part 4: Environment variables](#part-4-environment-variables) for the full 
 3. **Build**  
    - **Build Command:**  
      ```bash
-     pnpm install && pnpm --filter webapp build
+     pnpm install && pnpm db:generate && pnpm --filter webapp build
      ```  
+     (`pnpm db:generate` ensures the Prisma client exists before the webapp’s dependency `@openpay/backend` builds.)  
    - **Output Directory:** leave empty for a normal Next.js app (App Platform runs `next start`).
 
 4. **Run**  
@@ -273,9 +274,10 @@ Use **`db:deploy`** in production (applies existing migrations); `db:migrate` is
 
 | Issue | What to try |
 |-------|-------------|
-| **"failed to launch: determine start command: when there is no default process a command is required"** / **component hackmoney exited with code 190** | You have **one component** (e.g. named "hackmoney") with no **Run Command**. Fix: **(A)** In the Control Panel go to your app → that component → **Settings** → **Commands** and set **Run Command** to `pnpm db:generate && pnpm --filter api start`, **HTTP Port** to `3000`, and **Build Command** to `corepack enable && pnpm install && pnpm db:generate && pnpm --filter api build` (and add env vars). Then **Add Resource** → **Service** for the webapp (see Part 3.2). **(B)** Or use **Edit spec** / **Import app spec** and point to **`.do/app.yaml`** so you get two services (api + webapp) with run commands. The repo now has a root `start` script and **Procfile** so a single-component deploy at least starts the API. |
+| **"failed to launch: determine start command: when there is no default process a command is required"** / **component liquidcard exited with code 190** | You have **one component** (e.g. named "liquidcard") with no **Run Command**. Fix: **(A)** In the Control Panel go to your app → that component → **Settings** → **Commands** and set **Run Command** to `pnpm db:generate && pnpm --filter api start`, **HTTP Port** to `3000`, and **Build Command** to `corepack enable && pnpm install && pnpm db:generate && pnpm --filter api build` (and add env vars). Then **Add Resource** → **Service** for the webapp (see Part 3.2). **(B)** Or use **Edit spec** / **Import app spec** and point to **`.do/app.yaml`** so you get two services (api + webapp) with run commands. The repo now has a root `start` script and **Procfile** so a single-component deploy at least starts the API. |
 | **"Cannot find module .../apps/api/dist/index.js"** (or **dist/index.cjs**) | The API wasn’t built before run. Set **Build Command** for that component to: `corepack enable && pnpm install && pnpm db:generate && pnpm --filter api build`. Then redeploy. The run step needs the built `dist/` folder from this build. |
 | **"@prisma/client did not initialize yet. Please run \"prisma generate\""** | Run **prisma generate at start**: set **Run Command** to `pnpm db:generate && pnpm --filter api start`. The repo has `prisma` as a runtime dependency in the backend package so the CLI is available. Also keep **Build Command** with `pnpm db:generate` so the client is generated at build; if the run environment is separate, the run command above fixes it. |
+| **webapp build fails: Module '"@prisma/client"' has no exported member 'PrismaClient'** | The backend package (built as a dependency of webapp) needs the Prisma client before its DTS build. Set the **webapp** Build Command to include `pnpm db:generate` before the webapp build: `pnpm install && pnpm db:generate && pnpm --filter webapp build`. The backend also has a `prebuild` script that runs `prisma generate`. |
 | **"Deployed actions" / "typescript:default" / "runtime type could not be determined"** | You created a **Functions** app (serverless actions). This repo is for **App Platform** (two Node services). In DigitalOcean: **Create** → **Apps** → **Create App** (not Functions). Connect the same repo, then add two **Services** (api + webapp) as in Part 3, or import the app spec from **`.do/app.yaml`**. The repo includes a minimal **`project.yml`** and **`packages/do-stub`** only to satisfy Functions detection; deploy the real app with App Platform. |
 | **Unsupported runtime "typescript:default"** | If you’re on App Platform: in app/component **Settings**, set **Runtime** to `nodejs:18` or `nodejs:20` (not TypeScript). Repo has `package.json` engines, `.node-version`, and `nixpacks.toml` for Node 20—then redeploy. |
 | Build fails: “pnpm not found” | Use **Build Command**: `corepack enable && pnpm install && ...` or choose a **Node** environment that includes pnpm (or add an install step for pnpm). |
@@ -303,7 +305,7 @@ If you prefer a single server:
 3. **Install Node 18+ and pnpm:**  
    `curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -` then `sudo apt install -y nodejs` and `npm install -g pnpm`.
 4. **Install PostgreSQL and Redis** on the same Droplet (or use managed DB + Redis as above).
-5. **Clone repo:** `git clone https://github.com/RadiantHack/hackmoney.git && cd hackmoney`
+5. **Clone repo:** `git clone https://github.com/RadiantHack/hackmoney.git && cd hackmoney` (or your LiquidCard repo)
 6. **Env:** `cp .env.example .env` and fill in `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`.
 7. **Build & run:**  
    `pnpm install && pnpm build && pnpm db:migrate`  

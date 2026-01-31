@@ -17,6 +17,7 @@
     "seed": "ts-node prisma/seed/index.ts"
   },
   "scripts": {
+    "prebuild": "prisma generate",
     "build": "pnpm tsup",
     "clean": "rm -rf .turbo",
     "lint": "eslint .",

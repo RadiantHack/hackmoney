@@ -3,7 +3,7 @@
 # folder (backend/, logger/, ui/, etc.) with typescript:default and fails.
 # Use this spec: 2 services, both Node.js, source at repo root.
 
-name: hackmoney
+name: liquidcard
 region: nyc
 
 services:
@@ -24,7 +24,7 @@ services:
       repo: RadiantHack/hackmoney
       branch: main
       deploy_on_push: true
-    build_command: pnpm install && pnpm --filter webapp build
+    build_command: pnpm install && pnpm db:generate && pnpm --filter webapp build
     run_command: pnpm --filter webapp start
     environment_slug: node-js
     http_port: 3000
