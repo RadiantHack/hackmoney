@@ -54,24 +54,27 @@ export default function MerchantPage() {
   async function loadMerchantData() {
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) {
+      const userStr = localStorage.getItem("user");
+
+      console.log("[Merchant] Token:", token ? "exists" : "missing");
+      console.log("[Merchant] User:", userStr ? "exists" : "missing");
+
+      if (!token || !userStr) {
+        console.log("[Merchant] Redirecting to login - no auth found");
         router.push("/");
         return;
       }
 
       // Get user from localStorage (local auth)
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        console.log("Merchant User:", user);
-      }
+      const user = JSON.parse(userStr);
+      console.log("[Merchant] User loaded:", user.email);
 
       // For now, generate mock payments data
       setPayments([]);
 
       setLoading(false);
     } catch (error) {
-      console.error("Failed to load merchant data:", error);
+      console.error("[Merchant] Error:", error);
       setLoading(false);
     }
   }

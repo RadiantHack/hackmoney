@@ -111,7 +111,9 @@ export default function HomePage() {
       }
 
       const { message, signature } = siweData;
-      console.log("[Base Auth] Message signed, verifying on backend...");
+      console.log("[Base Auth] Message signed, using local auth...");
+      console.log("[Base Auth] Address:", address);
+      console.log("[Base Auth] Mode:", mode);
 
       const intent =
         mode === "signup_merchant" ? "signup_merchant" : "signin_customer";
@@ -145,6 +147,12 @@ export default function HomePage() {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(baseUser));
+
+      console.log("[Base Auth] Tokens saved to localStorage");
+      console.log("[Base Auth] User:", baseUser.email, "Role:", baseUser.role);
+
+      // Small delay to ensure localStorage is written before redirect
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       if (baseUser.role === "MERCHANT") {
         router.push("/merchant");

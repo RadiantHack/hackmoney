@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { API_BASE } from "../../lib/api";
 import "./styles.css";
 import {
@@ -78,6 +79,7 @@ type ActiveTab =
 type PaymentModal = null | "send" | "receive";
 
 export default function CustomerPage() {
+  const router = useRouter();
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,18 +93,21 @@ export default function CustomerPage() {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        if (!token) {
-          setError("Please login first");
-          setLoading(false);
+        const userStr = localStorage.getItem("user");
+        
+        console.log("[Customer] Token:", token ? "exists" : "missing");
+        console.log("[Customer] User:", userStr ? "exists" : "missing");
+
+        if (!token || !userStr) {
+          console.log("[Customer] Redirecting to login - no auth found");
+          router.push("/");
           return;
         }
 
         // Get user from localStorage (local auth)
-        const userStr = localStorage.getItem("user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setUserData(user);
-        }
+        const user = JSON.parse(userStr);
+        setUserData(user);
+        console.log("[Customer] User loaded:", user.email);
 
         // For now, generate mock card data from local storage
         const mockCard: CardData = {
@@ -125,14 +130,14 @@ export default function CustomerPage() {
 
         setLoading(false);
       } catch (err) {
+        console.error("[Customer] Error:", err);
         setError("Failed to load user data");
         setLoading(false);
-        console.error(err);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [router]);
 
   const formatCardNumber = (number: string, masked: boolean = true) => {
     if (masked) {
