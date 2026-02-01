@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE } from "../../lib/api";
 import "./styles.css";
+import SubAccountsManager from "./components/SubAccountsManager";
 import {
   BsEyeFill,
   BsEyeSlashFill,
@@ -74,6 +75,7 @@ type ActiveTab =
   | "cards"
   | "payments"
   | "transactions"
+  | "subaccounts"
   | "settings"
   | "nft";
 type PaymentModal = null | "send" | "receive";
@@ -252,6 +254,13 @@ export default function CustomerPage() {
               <FaHistory className="nav-icon" />
               <span>Transactions</span>
             </button>
+            <button
+              className={`nav-item ${activeTab === "subaccounts" ? "active" : ""}`}
+              onClick={() => setActiveTab("subaccounts")}
+            >
+              <IoCard className="nav-icon" />
+              <span>Sub Accounts</span>
+            </button>
           </div>
 
           <div className="nav-section">
@@ -292,6 +301,7 @@ export default function CustomerPage() {
               {activeTab === "cards" && "Virtual Cards"}
               {activeTab === "payments" && "Payments"}
               {activeTab === "transactions" && "Transactions"}
+              {activeTab === "subaccounts" && "Sub Accounts"}
               {activeTab === "settings" && "Settings"}
             </h2>
             <p className="page-subtitle">
@@ -300,6 +310,7 @@ export default function CustomerPage() {
               {activeTab === "cards" && "Manage your virtual cards"}
               {activeTab === "payments" && "Send and receive payments"}
               {activeTab === "transactions" && "View all your transactions"}
+              {activeTab === "subaccounts" && "Create and manage sub-accounts for family members"}
               {activeTab === "settings" && "Manage your account settings"}
             </p>
           </div>
@@ -801,6 +812,12 @@ export default function CustomerPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {activeTab === "subaccounts" && (
+            <div className="subaccounts-content">
+              <SubAccountsManager />
             </div>
           )}
 
