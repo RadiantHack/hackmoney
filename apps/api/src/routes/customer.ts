@@ -6,6 +6,7 @@ import {
 } from "express";
 import { prisma, verifyAccessToken, type TokenPayload } from "@openpay/backend";
 import { ErrorHandler, errors } from "@openpay/error-handler";
+import { generateBinCardWithAtm } from "../services/stripe";
 
 const router = Router();
 
@@ -53,8 +54,8 @@ router.get(
       }
       const userId = authReq.user.userId;
 
-      // gte user with customer details and cards
-      const user = await prisma.user.findUnique({
+      // Get user with customer details and cards
+      let user = await prisma.user.findUnique({
         where: { id: userId },
         include: {
           customer: {
@@ -65,7 +66,42 @@ router.get(
         },
       });
 
-      if (!user || !user.customer) {
+      if (!user) {
+        throw new ErrorHandler(errors.USER_NOT_FOUND);
+      }
+
+      if (!user.customer && user.role === "CUSTOMER") {
+        const customer = await prisma.customer.create({
+          data: { userId: user.id },
+        });
+        const binCard = await generateBinCardWithAtm();
+        await prisma.card.create({
+          data: {
+            customerId: customer.id,
+            cardNumber: binCard.cardNumber,
+            cardLast4: binCard.cardLast4,
+            cardBrand: binCard.cardBrand,
+            cardExpMonth: binCard.cardExpMonth,
+            cardExpYear: binCard.cardExpYear,
+            cardCvv: binCard.cardCvv,
+            cardPin: binCard.cardPin,
+            stripeCardId: binCard.cardId,
+          },
+        });
+        user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: {
+            customer: {
+              include: {
+                cards: true,
+              },
+            },
+          },
+        });
+        if (!user?.customer) {
+          throw new ErrorHandler(errors.USER_NOT_FOUND);
+        }
+      } else if (!user.customer) {
         throw new ErrorHandler(errors.USER_NOT_FOUND);
       }
 
@@ -108,18 +144,43 @@ router.get(
       }
       const userId = authReq.user.userId;
 
-      const customerWithCards = await prisma.customer.findFirst({
+      let customerWithCards = await prisma.customer.findFirst({
         where: { userId },
         include: {
           cards: true,
         },
       });
 
-      if (!customerWithCards || customerWithCards.cards.length === 0) {
+      if (!customerWithCards) {
         throw new ErrorHandler(errors.USER_NOT_FOUND);
       }
 
-      const card = customerWithCards.cards[0];
+      // If customer has no cards (e.g. created via update-role before we added card creation), create one
+      if (customerWithCards.cards.length === 0) {
+        const binCard = await generateBinCardWithAtm();
+        await prisma.card.create({
+          data: {
+            customerId: customerWithCards.id,
+            cardNumber: binCard.cardNumber,
+            cardLast4: binCard.cardLast4,
+            cardBrand: binCard.cardBrand,
+            cardExpMonth: binCard.cardExpMonth,
+            cardExpYear: binCard.cardExpYear,
+            cardCvv: binCard.cardCvv,
+            cardPin: binCard.cardPin,
+            stripeCardId: binCard.cardId,
+          },
+        });
+        customerWithCards = await prisma.customer.findFirst({
+          where: { userId },
+          include: { cards: true },
+        });
+      }
+
+      const card = customerWithCards?.cards[0];
+      if (!card) {
+        throw new ErrorHandler(errors.USER_NOT_FOUND);
+      }
 
       return res.json({
         card: {

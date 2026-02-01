@@ -115,14 +115,11 @@ export default function CustomerPage() {
         setUserData(profileData.user);
 
         // Fetch card details
-        const cardResponse = await fetch(
-          `${API_BASE}/api/customer/card`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const cardResponse = await fetch(`${API_BASE}/api/customer/card`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (cardResponse.ok) {
           const cardDataResponse = await cardResponse.json();

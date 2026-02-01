@@ -51,3 +51,36 @@ export function verifyRefreshToken(token: string): TokenPayload | null {
     return null;
   }
 }
+
+export interface MerchantSignupTempPayload {
+  address: string;
+  purpose: "merchant_signup";
+}
+
+/**
+ * Generate short-lived temp token for completing merchant signup (5 min)
+ */
+export function generateMerchantSignupTempToken(
+  address: string
+): string {
+  return jwt.sign(
+    { address, purpose: "merchant_signup" as const },
+    JWT_SECRET,
+    { expiresIn: "5m" }
+  );
+}
+
+/**
+ * Verify temp token for merchant signup
+ */
+export function verifyMerchantSignupTempToken(
+  token: string
+): MerchantSignupTempPayload | null {
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as MerchantSignupTempPayload;
+    if (payload.purpose !== "merchant_signup" || !payload.address) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
