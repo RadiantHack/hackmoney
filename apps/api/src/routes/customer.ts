@@ -4,7 +4,10 @@ import {
   type Response,
   type NextFunction,
 } from "express";
-import { prisma, verifyAccessToken, type TokenPayload } from "@openpay/backend";
+import { verifyAccessToken, type TokenPayload } from "@openpay/backend";
+// import { prisma } from "@openpay/backend";
+import mockPrisma from "../mock/prisma";
+const prisma = mockPrisma;
 import { ErrorHandler, errors } from "@openpay/error-handler";
 import { generateBinCardWithAtm } from "../services/stripe";
 

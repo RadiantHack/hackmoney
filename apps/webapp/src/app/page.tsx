@@ -28,14 +28,39 @@ export default function HomePage() {
     setLoading(true);
     setError("");
     try {
-      const provider = createBaseAccountSDK({
-        appName: "LiquidCard",
-      }).getProvider();
+      console.log("[Base Auth] Initializing SDK...");
+      
+      // Create SDK with timeout and error handling
+      let provider;
+      try {
+        const sdk = createBaseAccountSDK({
+          appName: "LiquidCard",
+          appLogoUrl: "https://liquidcard.io/logo.png",
+        });
+        provider = sdk.getProvider();
+      } catch (sdkErr) {
+        console.error("[Base Auth] SDK initialization failed:", sdkErr);
+        throw new Error("Failed to initialize Base wallet. Please ensure you have a compatible wallet installed.");
+      }
 
-      const nonceRes = await fetch(`${API_BASE}/api/auth/nonce`);
-      if (!nonceRes.ok) throw new Error("Failed to fetch nonce");
+      if (!provider) {
+        throw new Error("Wallet provider not available. Please ensure Base wallet extension is installed and enabled.");
+      }
+
+      console.log("[Base Auth] Fetching nonce...");
+      const nonceRes = await fetch(`${API_BASE}/api/auth/nonce`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(10000), // 10 second timeout
+      });
+      
+      if (!nonceRes.ok) {
+        throw new Error(`Failed to fetch nonce: ${nonceRes.status}`);
+      }
       const nonce = await nonceRes.text();
+      console.log("[Base Auth] Nonce received:", nonce.substring(0, 10) + "...");
 
+      console.log("[Base Auth] Requesting wallet connection...");
       const resp = await provider.request({
         method: "wallet_connect",
         params: [
@@ -49,52 +74,108 @@ export default function HomePage() {
             },
           },
         ],
+      }).catch((err: any) => {
+        console.error("[Base Auth] Provider request failed:", err);
+        throw new Error(
+          err?.message?.includes("timeout") || err?.message?.includes("ERR_CONNECTION")
+            ? "Network connection error. Please check your internet connection and try again."
+            : "Wallet connection failed. Please try again or use email login."
+        );
       });
-      const { accounts } = resp as { accounts: Array<{ address: string; capabilities?: { signInWithEthereum?: { message: string; signature: string } } }> };
+
+      if (!resp) {
+        throw new Error("No response from wallet provider");
+      }
+
+      const { accounts } = resp as { 
+        accounts: Array<{ 
+          address: string; 
+          capabilities?: { 
+            signInWithEthereum?: { 
+              message: string; 
+              signature: string 
+            } 
+          } 
+        }> 
+      };
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No wallet accounts found. Please ensure your wallet is unlocked.");
+      }
 
       const { address } = accounts[0];
       const siweData = accounts[0].capabilities?.signInWithEthereum;
 
       if (!siweData?.message || !siweData?.signature) {
-        throw new Error("SIWE data missing from response");
+        throw new Error("Wallet failed to sign message. Please try again.");
       }
 
       const { message, signature } = siweData;
+      console.log("[Base Auth] Message signed, verifying on backend...");
 
       const intent =
         mode === "signup_merchant" ? "signup_merchant" : "signin_customer";
 
-      const res = await fetch(`${API_BASE}/api/auth/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address, message, signature, intent }),
-      });
+      // TEMPORARY: Use local Base auth (Prisma commented out)
+      console.log("[Base Auth] Using temporary local auth (Prisma disabled)");
+      
+      const baseUser = {
+        id: address,
+        email: `${address}@base.wallet`,
+        name: `User ${address.slice(0, 6)}`,
+        role: mode === "signup_merchant" ? "MERCHANT" : "CUSTOMER",
+        address,
+        createdAt: new Date().toISOString(),
+      };
 
-      const body = await res.json().catch(() => ({}));
+      // Generate temporary tokens
+      const accessToken = btoa(JSON.stringify({ address, role: baseUser.role }));
+      const refreshToken = btoa(JSON.stringify({ address, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }));
 
-      if (!res.ok) {
-        throw new Error(body?.error || "Verification failed");
-      }
+      console.log("[Base Auth] Local auth successful!");
 
-      if (body.needsMerchantDetails && body.tempToken) {
-        setTempToken(body.tempToken);
+      // For merchant signup, show form
+      if (mode === "signup_merchant") {
+        setTempToken(accessToken);
         setShowMerchantForm(true);
         setLoading(false);
         return;
       }
 
-      localStorage.setItem("accessToken", body.accessToken);
-      localStorage.setItem("refreshToken", body.refreshToken);
-      localStorage.setItem("user", JSON.stringify(body.user));
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user", JSON.stringify(baseUser));
 
-      if (body.user?.role === "MERCHANT") {
+      if (baseUser.role === "MERCHANT") {
         router.push("/merchant");
       } else {
         router.push("/customer");
       }
+      
+      /* COMMENTED: Prisma API verification temporarily disabled
+      const res = await fetch(`${API_BASE}/api/auth/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address, message, signature, intent }),
+        signal: AbortSignal.timeout(10000), // 10 second timeout
+      });
+
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const errorMsg = body?.error || `Verification failed: ${res.status}`;
+        throw new Error(errorMsg);
+      }
+      */
     } catch (err) {
       console.error("[Base Auth] Error:", err);
-      setError(err instanceof Error ? err.message : String(err));
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage);
+      
+      // Log specific error types for debugging
+      if (errorMessage.includes("timeout") || errorMessage.includes("ERR_CONNECTION")) {
+        console.error("[Base Auth] Network connectivity issue detected");
+      }
     } finally {
       setLoading(false);
     }
@@ -115,6 +196,31 @@ export default function HomePage() {
     setLoading(true);
     setError("");
     try {
+      // TEMPORARY: Use local auth for merchant signup (Prisma commented out)
+      console.log("[Base Auth] Processing merchant signup locally...");
+      
+      const merchantUser = {
+        id: tempToken || "merchant_" + Date.now(),
+        email: `merchant_${Date.now()}@base.wallet`,
+        name: merchantForm.name,
+        businessName: merchantForm.businessName,
+        role: "MERCHANT",
+        address: tempToken,
+        createdAt: new Date().toISOString(),
+      };
+
+      // Generate persistent tokens
+      const accessToken = btoa(JSON.stringify({ address: tempToken, role: "MERCHANT", businessName: merchantForm.businessName }));
+      const refreshToken = btoa(JSON.stringify({ address: tempToken, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }));
+
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("user", JSON.stringify(merchantUser));
+
+      console.log("[Base Auth] Merchant account created locally!");
+      router.push("/merchant");
+      
+      /* COMMENTED: Prisma API temporarily disabled
       const res = await fetch(`${API_BASE}/api/auth/complete-merchant-signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,10 +234,11 @@ export default function HomePage() {
       if (!res.ok) {
         throw new Error(body?.error || "Sign up failed");
       }
-      localStorage.setItem("accessToken", body.accessToken);
-      localStorage.setItem("refreshToken", body.refreshToken);
+      localStorage.setItem("access_token", body.accessToken);
+      localStorage.setItem("refresh_token", body.refreshToken);
       localStorage.setItem("user", JSON.stringify(body.user));
       router.push("/merchant");
+      */
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -281,10 +388,47 @@ export default function HomePage() {
                 ? "Connect your wallet to sign up as a merchant."
                 : "Connect your wallet to sign in as a customer."}
             </p>
-            <SignInWithBaseButton
-              colorScheme="system"
+            <button
+              type="button"
+              className={`button wallet-button ${loading ? "loading" : ""}`}
               onClick={() => signInWithBase()}
-            />
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner"></span>
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="button-icon"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M10.894 2.553a.961.961 0 00-1.788 0l-7 14a.961.961 0 001.784 1.447L5.286 15h5.428l.428 2.447a.961.961 0 001.784-1.447l-7-14zM6.803 13h6.394L10 5.819 6.803 13z" />
+                  </svg>
+                  Connect Base Wallet
+                </>
+              )}
+            </button>
+            
+            {error && (
+              <div className="error-message-detail">
+                <p>Having trouble with wallet connection?</p>
+                <button
+                  type="button"
+                  className="button-link"
+                  onClick={() => {
+                    setError("");
+                    console.log("Wallet connection troubleshooting...");
+                  }}
+                >
+                  View troubleshooting guide
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

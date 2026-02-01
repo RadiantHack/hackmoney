@@ -3,7 +3,9 @@ import crypto from "crypto";
 import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import bcrypt from "bcrypt";
-import { prisma } from "@openpay/backend";
+// import { prisma } from "@openpay/backend";
+import mockPrisma from "../mock/prisma";
+const prisma = mockPrisma;
 import {
   storeToken,
   storeRefreshToken,

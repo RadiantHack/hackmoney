@@ -2,9 +2,12 @@ import { json, urlencoded } from "body-parser";
 import express, { type Express } from "express";
 import morgan from "morgan";
 import cors from "cors";
-import { prisma } from "@openpay/backend";
+// import { prisma } from "@openpay/backend";
+import mockPrisma from "./mock/prisma";
+const prisma = mockPrisma;
 import authRoutes from "./routes/auth";
 import customerRoutes from "./routes/customer";
+import merchantRoutes from "./routes/merchant";
 import { errorHandlerMiddleware } from "./middleware/errorHandler";
 
 export const createServer = (): Express => {
@@ -24,6 +27,7 @@ export const createServer = (): Express => {
     })
     .use("/api/auth", authRoutes)
     .use("/api/customer", customerRoutes)
+    .use("/api/merchant", merchantRoutes)
     .get("/api/payments", async (req, res) => {
       try {
         const payments = await prisma.payment.findMany({
