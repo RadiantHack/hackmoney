@@ -142,8 +142,8 @@ export default function HomePage() {
         return;
       }
 
-      localStorage.setItem("access_token", accessToken);
-      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(baseUser));
 
       if (baseUser.role === "MERCHANT") {
@@ -213,8 +213,8 @@ export default function HomePage() {
       const accessToken = btoa(JSON.stringify({ address: tempToken, role: "MERCHANT", businessName: merchantForm.businessName }));
       const refreshToken = btoa(JSON.stringify({ address: tempToken, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }));
 
-      localStorage.setItem("access_token", accessToken);
-      localStorage.setItem("refresh_token", refreshToken);
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
       localStorage.setItem("user", JSON.stringify(merchantUser));
 
       console.log("[Base Auth] Merchant account created locally!");

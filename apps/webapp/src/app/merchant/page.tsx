@@ -53,26 +53,21 @@ export default function MerchantPage() {
 
   async function loadMerchantData() {
     try {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("accessToken");
       if (!token) {
         router.push("/");
         return;
       }
 
-      // Load payments
-      const paymentsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/merchant/payments`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (paymentsRes.ok) {
-        const data = await paymentsRes.json();
-        setPayments(data.payments || []);
+      // Get user from localStorage (local auth)
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        console.log("Merchant User:", user);
       }
+
+      // For now, generate mock payments data
+      setPayments([]);
 
       setLoading(false);
     } catch (error) {
@@ -91,37 +86,12 @@ export default function MerchantPage() {
     setLastPaymentStatus(null);
 
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/merchant/payment/tap`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            cardNumber,
-            cardCvv,
-            amount: parseFloat(paymentAmount),
-            currency: "USD",
-            description: paymentDescription || `Payment of $${paymentAmount}`,
-            terminalId: "WEB-TERMINAL-1",
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.success) {
-        setLastPaymentStatus("success");
-        setPaymentAmount("");
-        setPaymentDescription("");
-        loadMerchantData();
-      } else {
-        setLastPaymentStatus("failed");
-        alert(data.error || "Payment failed");
-      }
+      const token = localStorage.getItem("accessToken");
+      // Mock payment processing for local auth
+      setLastPaymentStatus("success");
+      setPaymentAmount("");
+      setPaymentDescription("");
+      loadMerchantData();
     } catch (error) {
       console.error("Payment processing error:", error);
       setLastPaymentStatus("failed");

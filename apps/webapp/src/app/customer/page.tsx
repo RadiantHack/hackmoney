@@ -97,46 +97,28 @@ export default function CustomerPage() {
           return;
         }
 
-        // Fetch user profile and card details
-        const profileResponse = await fetch(
-          `${API_BASE}/api/customer/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!profileResponse.ok) {
-          throw new Error("Failed to fetch profile");
+        // Get user from localStorage (local auth)
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setUserData(user);
         }
 
-        const profileData = await profileResponse.json();
-        setUserData(profileData.user);
-
-        // Fetch card details
-        const cardResponse = await fetch(`${API_BASE}/api/customer/card`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (cardResponse.ok) {
-          const cardDataResponse = await cardResponse.json();
-          setCardData({
-            cardId: cardDataResponse.card.cardId,
-            cardNumber: cardDataResponse.card.cardNumber,
-            cardBrand: cardDataResponse.card.cardBrand,
-            cardLast4: cardDataResponse.card.cardLast4,
-            cardExpMonth: cardDataResponse.card.cardExpMonth,
-            cardExpYear: cardDataResponse.card.cardExpYear,
-            cardCvv: cardDataResponse.card.cardCvv,
-            cardStatus: cardDataResponse.card.cardStatus,
-            balance: 0,
-            spentThisMonth: 0,
-            limit: 0,
-          });
-        }
+        // For now, generate mock card data from local storage
+        const mockCard: CardData = {
+          cardId: "CARD_" + Date.now(),
+          cardNumber: "4532 •••• •••• 1234",
+          cardBrand: "Visa",
+          cardLast4: "1234",
+          cardExpMonth: 12,
+          cardExpYear: 28,
+          cardCvv: "•••",
+          cardStatus: "ACTIVE",
+          balance: 5000,
+          spentThisMonth: 1250,
+          limit: 5000,
+        };
+        setCardData(mockCard);
 
         // Set empty transactions for now
         setTransactions([]);
