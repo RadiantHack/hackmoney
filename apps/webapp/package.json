@@ -11,7 +11,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@base-org/account": "^2.5.1",
+    "@base-org/account-ui": "^1.0.1",
     "@openpay/logger": "workspace:*",
+    "viem": "^1.2.0",
     "@openpay/ui": "workspace:*",
     "next": "16.0.10",
     "react": "^19.2.0",

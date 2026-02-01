@@ -26,6 +26,8 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "prisma": "^5.19.0"
+    ,
+    "viem": "^2.45.1"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

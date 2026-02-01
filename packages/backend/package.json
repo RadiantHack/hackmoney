@@ -35,11 +35,13 @@
   "dependencies": {
     "@openpay/error-handler": "workspace:*",
     "@openpay/logger": "workspace:*",
+    "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^5.22.0",
     "bcrypt": "^5.1.0",
+    "dotenv": "^17.2.3",
     "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^5.22.0"
+    "pg": "^8.18.0"
   },
   "devDependencies": {
     "@openpay/eslint-config": "workspace:*",
@@ -48,6 +50,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.15.3",
+    "prisma": "^5.22.0",
     "ts-node": "^10.9.2",
     "tsup": "^8.5.0",
     "typescript": "5.9.3"
